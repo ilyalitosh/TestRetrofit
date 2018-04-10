@@ -1,11 +1,9 @@
-package com.example.litosh.testretrofit.ui;
+package com.example.litosh.testretrofit;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.example.litosh.testretrofit.App;
-import com.example.litosh.testretrofit.R;
 import com.example.litosh.testretrofit.models.Groups;
 import com.example.litosh.testretrofit.models.schedule.group.Schedule;
 import com.example.litosh.testretrofit.models.schedule.group.ScheduleCore;
