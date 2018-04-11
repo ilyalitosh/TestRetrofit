@@ -16,6 +16,10 @@ import com.example.litosh.testretrofit.models.Student;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -30,8 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputClass;
     private EditText inputLetterOfClass;
     private EditText inputAddress;
+    private EditText inputIdForShowStudentsById;
     private TextView showingStudent;
     private Button addStudentButton;
+    private Button showStudentsByIdButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         addStudentButton = v1.findViewById(R.id.add_student_button);
 
         showingStudent = v2.findViewById(R.id.text_output);
+        showStudentsByIdButton = v2.findViewById(R.id.show_students_with_id_button);
+        inputIdForShowStudentsById = v2.findViewById(R.id.input_for_searchingById);
     }
 
     private void initAdapter(){
@@ -87,20 +95,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initListeners(){
-        addStudentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(isNotEmptyInputs()){
-                    Toast.makeText(MainActivity.this, "Какое-то поле пустое", Toast.LENGTH_SHORT).show();
-                }else{
-                    addStudent(inputFirstName.getText().toString(),
-                            inputSecondName.getText().toString(),
-                            inputAddress.getText().toString(),
-                            inputBirthday.getText().toString(),
-                            Integer.valueOf(inputClass.getText().toString()),
-                            inputLetterOfClass.getText().toString());
-                }
+        addStudentButton.setOnClickListener(v -> {
+            if(isNotEmptyInputs()){
+                Toast.makeText(MainActivity.this, "Какое-то поле пустое", Toast.LENGTH_SHORT).show();
+            }else{
+                addStudent(inputFirstName.getText().toString(),
+                        inputSecondName.getText().toString(),
+                        inputAddress.getText().toString(),
+                        inputBirthday.getText().toString(),
+                        Integer.valueOf(inputClass.getText().toString()),
+                        inputLetterOfClass.getText().toString());
             }
+        });
+        showStudentsByIdButton.setOnClickListener(v -> {
+            showStudentById(Integer.valueOf(inputIdForShowStudentsById.getText().toString()));
         });
         vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -125,8 +133,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showStudents(){
-        App.getSchoolApi().getStudents().enqueue(new Callback<List<Student>>() {
+    private void showStudentById(int id){
+        System.out.println(App.getSchoolApi().getStudents(10).request().toString());
+        App.getSchoolApi().getStudents(id).enqueue(new Callback<List<Student>>() {
             @Override
             public void onResponse(Call<List<Student>> call, Response<List<Student>> response) {
                 List<Student> studentList = response.body();
@@ -145,6 +154,92 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(t.toString());
             }
         });
+        /*App.getSchoolApi()
+                .getStudents(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Student>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(List<Student> students) {
+                        StringBuilder s = new StringBuilder();
+                        for(int i = 0; i < students.size(); i++){
+                            s.append("id: ").append(students.get(i).getId())
+                                    .append(", Фамилия: ").append(students.get(i).getSecondName())
+                                    .append(", Имя: ").append(students.get(i).getFirstName())
+                                    .append("\n");
+                        }
+                        showingStudent.setText(s.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println(e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });*/
+    }
+
+    private void showStudents(){
+        /*App.getSchoolApi().getStudents().enqueue(new Callback<List<Student>>() {
+            @Override
+            public void onResponse(Call<List<Student>> call, Response<List<Student>> response) {
+                List<Student> studentList = response.body();
+                StringBuilder s = new StringBuilder();
+                for(int i = 0; i < studentList.size(); i++){
+                    s.append("id: ").append(studentList.get(i).getId())
+                            .append(", Фамилия: ").append(studentList.get(i).getSecondName())
+                            .append(", Имя: ").append(studentList.get(i).getFirstName())
+                            .append("\n");
+                }
+                showingStudent.setText(s.toString());
+            }
+
+            @Override
+            public void onFailure(Call<List<Student>> call, Throwable t) {
+                System.out.println(t.toString());
+            }
+        });*/
+        App.getSchoolApi()
+                .getStudents()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Student>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(List<Student> students) {
+                        StringBuilder s = new StringBuilder();
+                        for(int i = 0; i < students.size(); i++){
+                            s.append("id: ").append(students.get(i).getId())
+                                    .append(", Фамилия: ").append(students.get(i).getSecondName())
+                                    .append(", Имя: ").append(students.get(i).getFirstName())
+                                    .append("\n");
+                        }
+                        showingStudent.setText(s.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println(e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     private void addStudent(String firstName, String secondName, String address,
@@ -156,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
         student.setBirthday(birthday);
         student.setClass_(_class);
         student.setLetterOfClass(letterOfClass);
-        App.getSchoolApi().addStudent(student).enqueue(new Callback<Student>() {
+        /*App.getSchoolApi().addStudent(student).enqueue(new Callback<Student>() {
             @Override
             public void onResponse(Call<Student> call, Response<Student> response) {
                 Toast.makeText(MainActivity.this,
@@ -168,7 +263,34 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<Student> call, Throwable t) {
                 System.out.println(t.toString());
             }
-        });
+        });*/
+        App.getSchoolApi()
+                .addStudent(student)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Student>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Student student) {
+                        Toast.makeText(MainActivity.this,
+                                "Успешное добавление",
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println(e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
 }
