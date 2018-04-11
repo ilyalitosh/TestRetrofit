@@ -5,7 +5,6 @@ import com.example.litosh.testretrofit.models.Student;
 import java.util.List;
 
 import io.reactivex.Observable;
-import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -17,7 +16,7 @@ public interface SchoolApi {
     Observable<List<Student>> getStudents();
 
     @GET("students/students")
-    Call<List<Student>> getStudents(@Query("id") int id);
+    Observable<List<Student>> getStudents(@Query("id") int id);
 
     @POST("addStudent")
     Observable<Student> addStudent(@Body Student student);

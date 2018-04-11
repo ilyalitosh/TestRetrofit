@@ -134,8 +134,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showStudentById(int id){
-        System.out.println(App.getSchoolApi().getStudents(10).request().toString());
-        App.getSchoolApi().getStudents(id).enqueue(new Callback<List<Student>>() {
+        /*App.getSchoolApi().getStudents(id).enqueue(new Callback<List<Student>>() {
             @Override
             public void onResponse(Call<List<Student>> call, Response<List<Student>> response) {
                 List<Student> studentList = response.body();
@@ -153,8 +152,8 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<List<Student>> call, Throwable t) {
                 System.out.println(t.toString());
             }
-        });
-        /*App.getSchoolApi()
+        });*/
+        App.getSchoolApi()
                 .getStudents(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -185,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete() {
 
                     }
-                });*/
+                });
     }
 
     private void showStudents(){
